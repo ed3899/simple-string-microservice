@@ -6,6 +6,12 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 )
+type CountRequest struct {
+	S string `json:"s"`
+}
+type CountResponse struct {
+	V int `json:"v"`
+}
 
 func MakeCountEndpoint(svc services.StringService) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {

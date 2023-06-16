@@ -8,7 +8,7 @@ import (
 )
 
 func DecodeCountRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request endpoints.CountResponse
+	var request endpoints.CountRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, err
 	}
