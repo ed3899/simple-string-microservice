@@ -6,25 +6,54 @@ import (
 	"edca3899/string-service/services"
 	"edca3899/string-service/transports"
 
-	native_log "log"
 	"net/http"
 	"os"
 
 	"github.com/go-kit/kit/endpoint"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
+
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 func main() {
 	port := "3333"
 
 	logger := log.NewLogfmtLogger(os.Stderr)
+
+	fieldKeys := []string{"method", "error"}
+	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "my_group",
+		Subsystem: "string_service",
+		Name:      "request_count",
+		Help:      "Number of request received.",
+	}, fieldKeys)
+	requestLatency := kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+		Namespace: "my_group",
+		Subsystem: "string_service",
+		Name:      "request_latency_microseconds",
+		Help:      "Total duration of requests in microseconds.",
+	}, fieldKeys)
+	countResult := kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+		Namespace: "my_group",
+		Subsystem: "string_service",
+		Name:      "count_result",
+		Help:      "The result of each count method.",
+	}, []string{})
+
 	// Service logging
 	var svc services.StringServiceI
 	svc = services.StringService{}
 	svc = middleware.AppLoggingMiddleware{
 		Logger: logger,
-		Next: svc,
+		Next:   svc,
+	}
+	svc = middleware.PrometheusMiddleware{
+		RequestCount:   requestCount,
+		RequestLatency: requestLatency,
+		CountResult:    countResult,
+		Next:           svc,
 	}
 
 	// Endpoint logging
@@ -51,6 +80,6 @@ func main() {
 	http.Handle("/uppercase", uppercaseHandler)
 	http.Handle("/count", countHandler)
 
-	native_log.Printf("Server listening on port %s\n", port)
-	native_log.Fatal(http.ListenAndServe(":"+port, nil))
+	logger.Log("msg", "HTTP", "addr", port)
+	logger.Log("err", http.ListenAndServe(":"+port, nil))
 }
