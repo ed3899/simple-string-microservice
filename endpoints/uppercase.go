@@ -15,7 +15,7 @@ type UppercaseResponse struct {
 	Err string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
 }
 
-func MakeUppercaseEndpoint(svc services.StringService) endpoint.Endpoint {
+func MakeUppercaseEndpoint(svc services.StringServiceI) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(UppercaseRequest)
 		v, err := svc.Uppercase(req.S)

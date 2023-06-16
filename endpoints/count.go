@@ -13,7 +13,7 @@ type CountResponse struct {
 	V int `json:"v"`
 }
 
-func MakeCountEndpoint(svc services.StringService) endpoint.Endpoint {
+func MakeCountEndpoint(svc services.StringServiceI) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(CountRequest)
 		v := svc.Count(req.S)

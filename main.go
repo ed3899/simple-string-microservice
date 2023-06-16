@@ -16,12 +16,18 @@ import (
 )
 
 func main() {
-	svc := services.StringService{}
 	port := "3333"
 
-	// Instrumentation
 	logger := log.NewLogfmtLogger(os.Stderr)
+	// Service logging
+	var svc services.StringServiceI
+	svc = services.StringService{}
+	svc = middleware.AppLoggingMiddleware{
+		Logger: logger,
+		Next: svc,
+	}
 
+	// Endpoint logging
 	var uppercase endpoint.Endpoint
 	uppercase = endpoints.MakeUppercaseEndpoint(svc)
 	uppercase = middleware.EnpointLogging(log.With(logger, "method", "uppercase"))(uppercase)
