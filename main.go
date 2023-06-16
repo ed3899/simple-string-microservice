@@ -6,9 +6,9 @@ import (
 	"edca3899/string-service/services"
 	"edca3899/string-service/transports"
 
+	native_log "log"
 	"net/http"
 	"os"
-	native_log "log"
 
 	"github.com/go-kit/kit/endpoint"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -24,11 +24,11 @@ func main() {
 
 	var uppercase endpoint.Endpoint
 	uppercase = endpoints.MakeUppercaseEndpoint(svc)
-	uppercase = middleware.Logging(log.With(logger, "method", "uppercase"))(uppercase)
+	uppercase = middleware.EnpointLogging(log.With(logger, "method", "uppercase"))(uppercase)
 
 	var count endpoint.Endpoint
 	count = endpoints.MakeCountEndpoint(svc)
-	count = middleware.Logging(log.With(logger, "method", "count"))(count)
+	count = middleware.EnpointLogging(log.With(logger, "method", "count"))(count)
 
 	uppercaseHandler := httptransport.NewServer(
 		uppercase,
