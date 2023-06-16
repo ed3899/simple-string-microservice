@@ -1,4 +1,4 @@
-package simplestringservice
+package services
 
 import (
 	"errors"
